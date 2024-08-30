@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework import generics
@@ -10,8 +10,19 @@ from .models import Diary
 
 
 class DiariesMixinAPIView(generics.ListAPIView):
-    queryset = Diary.objects.all()
     serializer_class = DiaryDateSerializer
+
+    def get_queryset(self):
+        today = timezone.now()
+
+        # GET 요청에서 연도와 월을 가져옵니다. 없으면 기본값으로 현재 연도와 월을 사용합니다.
+        year = self.request.query_params.get('year', today.year)
+        month = self.request.query_params.get('month', today.month)
+
+        return Diary.objects.filter(
+            date__year=year,
+            date__month=month
+        )
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
