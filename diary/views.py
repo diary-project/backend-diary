@@ -4,7 +4,8 @@ from django.core.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework import generics
 
-from .serializers import DiaryDateSerializer, DiaryDetailSerializer, DiaryCreateSerializer, DiaryUpdateSerializer
+from .serializers import (DiaryDateSerializer, DiaryDetailSerializer, DiaryCombinedSerializer,
+                          DiaryCreateSerializer, DiaryUpdateSerializer)
 from .models import Diary
 
 
@@ -25,13 +26,15 @@ class DiaryCreateMixinAPIView(generics.CreateAPIView):
 
 class DiaryMixinAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Diary.objects.all()
-    serializer_class = DiaryDetailSerializer
+    # serializer_class = DiaryDetailSerializer
+    serializer_class = DiaryCombinedSerializer
     lookup_field = 'date'
 
     def get_serializer_class(self):
         if self.request.method == "PUT":
             return DiaryUpdateSerializer
-        return DiaryDetailSerializer
+        return DiaryCombinedSerializer
+        # return DiaryDetailSerializer
 
     def get_object(self):
         # 쿼리 파라미터에서 'date' 값을 가져옵니다.
