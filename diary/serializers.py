@@ -31,13 +31,15 @@ class DiaryDetailSerializer(serializers.ModelSerializer):
 
 class DiaryCombinedSerializer(serializers.ModelSerializer):
     url = serializers.CharField(source='image.url')
-    tags = serializers.ListSerializer(
-        child=serializers.CharField(source='tag.word')
-    )
+    tags = serializers.SerializerMethodField()
 
     class Meta:
         model = Diary
         fields = ['date', 'content', 'url', 'tags']
+
+    def get_tags(self, obj):
+        tags = Tag.objects.filter(diary=obj)
+        return [tag.word for tag in tags]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -48,11 +50,6 @@ class DiaryCombinedSerializer(serializers.ModelSerializer):
         except Image.DoesNotExist:
             representation['url'] = None
 
-        try:
-            tags = Tag.objects.filter(diary=instance)
-            tag_list = [tag.word for tag in tags]
-            representation['tags'] = tag_list
-        except Tag.DoesNotExist:
-            representation['tags'] = []
+        representation['tags'] = self.get_tags(instance)
 
         return representation
