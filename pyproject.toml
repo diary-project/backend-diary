@@ -11,6 +11,8 @@ django = "^5.1"
 django-restframework = "^0.0.1"
 django-allauth = "^64.1.0"
 djangorestframework-simplejwt = "^5.3.1"
+drf-yasg = "^1.21.7"
+django-cors-headers = "^4.4.0"
 
 
 [build-system]

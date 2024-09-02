@@ -16,10 +16,32 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Diary Project API",
+        default_version='v1',
+        description="This is Swagger Docs of Diary Project",
+        contact=openapi.Contact(email="v4chelsea@gmail.com"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
 
 urlpatterns = [
+    # admin
     path('admin/', admin.site.urls),
+    # Swagger UI:
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
     path('diary/', include('diary.urls')),
     path('image/', include('image.urls')),
     path('tag/', include('tag.urls')),
+    path('oauth/', include('oauth.urls')),
 ]
