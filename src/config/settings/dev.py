@@ -16,10 +16,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME', 'diary_app'),
-        'USER': os.environ.get('DB_USER', 'user'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'rlaeowjd1!'),
-        'HOST': os.environ.get('DB_HOST', 'db'),
-        'PORT': '13306',
+        'USER': os.environ.get('DB_USER', 'geuttaen'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'kJp#dpOFdJCADjLg8Z'),
+        'HOST': os.environ.get('DB_HOST', 'diary-dev.c3e4cuegc63x.ap-northeast-2.rds.amazonaws.com'),
+        'PORT': '3306',
     }
 }
 
