@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rlaeowjd1!
+      MYSQL_DATABASE: diary_app
+      MYSQL_USER: user
+      MYSQL_PASSWORD: rlaeowjd1!
+    ports:
+      - "13306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  web:
+    build: .
+    command: bash -c "python src/manage.py migrate && python src/manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "18000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_NAME: diary_app
+      DB_USER: user
+      DB_PASSWORD: rlaeowjd1!
+      DB_HOST: db
+      DB_PORT: 13306
+
+volumes:
+  db_data:

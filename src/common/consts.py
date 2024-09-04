@@ -1,3 +1,6 @@
+from django.conf import settings
+
+
 class KakaoUrls:
     AUTHORIZE_URL = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s"
     ACCESS_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
@@ -6,9 +9,8 @@ class KakaoUrls:
 
 
 class CallBackUrls:
-    CALLBACK_TOKEN_URL = "http://localhost:8000/accounts/kakao/login/callback/"
-    CALLBACK_AUTH_URL = "http://localhost:8000/oauth/token/"
-    REDIRECT_URL = "http://localhost:5173/oauth/kakao/callback/"
+    CALLBACK_AUTH_URL = f"{settings.SERVER_URL}/oauth/token/"
+    REDIRECT_URL = f"{settings.CLIENT_URL}/oauth/kakao/callback/"
 
 
 class KakaoCodes:
