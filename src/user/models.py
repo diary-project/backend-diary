@@ -28,4 +28,4 @@ class User(AbstractBaseUser, BaseModel):
         return self.email
 
     class Meta:
-        db_table = "member"
+        db_table = "user"

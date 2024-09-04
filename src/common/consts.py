@@ -10,7 +10,8 @@ class KakaoUrls:
 
 class CallBackUrls:
     CALLBACK_AUTH_URL = f"{settings.SERVER_URL}/oauth/token/"
-    REDIRECT_URL = f"{settings.CLIENT_URL}/oauth/kakao/callback/"
+    REDIRECT_URL = f"{settings.CLIENT_URL}/"
+    # REDIRECT_URL = f"{settings.CLIENT_URL}/oauth/kakao/callback/"
 
 
 class KakaoCodes:

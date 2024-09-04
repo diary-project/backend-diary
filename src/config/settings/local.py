@@ -9,7 +9,7 @@ ALLOWED_HOSTS = [
 ]
 
 SERVER_URL = 'http://localhost:8000'
-CLIENT_URL = 'http://localhost:5173'
+CLIENT_URL = 'http://localhost:3000'
 
 # DataBase
 DATABASES = {
