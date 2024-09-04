@@ -1,7 +1,8 @@
 from django.http import HttpResponseRedirect
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from common.consts import KakaoUrls, KakaoCodes, CallBackUrls
 from utils.user_utils import UserUtil
@@ -11,28 +12,37 @@ from user.models import User
 import requests
 
 
-@api_view(["GET"])
-def kakao_redirect(request):
-    kakao_auth_url = KakaoUrls.AUTHORIZE_URL % (KakaoCodes.APP_KEY_REST_API, CallBackUrls.REDIRECT_URL)
-    # kakao_auth_url = KakaoUrls.AUTHORIZE_URL % (KakaoCodes.APP_KEY_REST_API, CallBackUrls.CALLBACK_AUTH_URL)
+class KakaoRedirectView(APIView):
+    permission_classes = [AllowAny]
 
-    return HttpResponseRedirect(kakao_auth_url)
+    def get(self, request):
+        kakao_auth_url = KakaoUrls.AUTHORIZE_URL % (KakaoCodes.APP_KEY_REST_API, CallBackUrls.REDIRECT_URL)
+        # kakao_auth_url = KakaoUrls.AUTHORIZE_URL % (KakaoCodes.APP_KEY_REST_API, CallBackUrls.CALLBACK_AUTH_URL)
+
+        return HttpResponseRedirect(kakao_auth_url)
 
 
-@api_view(["GET"])
-def kakao_login(request):
-    code = request.GET.get("code")
-    user_profile = get_user_profile_from_kakao(code)
-    user, _ = create_member(user_profile)
+class KakaoLoginView(APIView):
+    permission_classes = [AllowAny]
 
-    # Token 생성하는 로직
-    user_jwt = TokenUtil.generate_token(user)
-    print(user_jwt)
+    def get(self, request):
+        code = request.GET.get("code")
+        user_profile = get_user_profile_from_kakao(code)
 
-    return Response(
-        data=user_jwt,
-        status=status.HTTP_200_OK
-    )
+        kakao_oid = user_profile.get("id")
+        kakao_account = user_profile.get("kakao_account")
+        email = kakao_account.get("email")
+        nickname = UserUtil.generate_random_kor_nickname()
+
+        user, _ = get_or_create_member(email, kakao_oid, nickname)
+
+        # Token 생성하는 로직
+        user_jwt = TokenUtil.generate_token(user)
+
+        return Response(
+            data=user_jwt,
+            status=status.HTTP_200_OK
+        )
 
 
 def get_user_profile_from_kakao(code):
@@ -92,12 +102,7 @@ def request_kakao_user_info(access_token):
     return user_info_json
 
 
-def create_member(user_profile):
-    kakao_oid = user_profile.get("id")
-    kakao_account = user_profile.get("kakao_account")
-    email = kakao_account.get("email")
-    nickname = UserUtil.generate_random_kor_nickname()
-
+def get_or_create_member(email, kakao_oid, nickname):
     return User.objects.get_or_create(
         email=email,
         defaults={

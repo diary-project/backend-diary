@@ -9,3 +9,6 @@ class Tag(BaseModel):
 
     def __str__(self):
         return self.word
+
+    class Meta:
+        db_table = "tag"

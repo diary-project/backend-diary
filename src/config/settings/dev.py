@@ -4,7 +4,7 @@ SECRET_KEY = 'django-insecure-nf+j=6s(uu+qu3_!x1y*)ho)*3dv@^4ebp7!thg-0*&%p4s9re
 
 DEBUG = True
 ALLOWED_HOSTS = [
-    '13.124.194.227'
+    '13.124.194.227',
     'ec2-13-124-194-227.ap-northeast-2.compute.amazonaws.com',
 ]
 
@@ -15,10 +15,10 @@ CLIENT_URL = 'http://localhost:5173'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME', 'diary_app'),
+        'NAME': os.environ.get('DB_NAME', 'diary_db'),
         'USER': os.environ.get('DB_USER', 'geuttaen'),
         'PASSWORD': os.environ.get('DB_PASSWORD', 'kJp#dpOFdJCADjLg8Z'),
-        'HOST': os.environ.get('DB_HOST', 'diary-dev.c3e4cuegc63x.ap-northeast-2.rds.amazonaws.com'),
+        'HOST': os.environ.get('DB_HOST', 'diary-db-dev.c3e4cuegc63x.ap-northeast-2.rds.amazonaws.com'),
         'PORT': '3306',
     }
 }

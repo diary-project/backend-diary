@@ -79,7 +79,12 @@ MIDDLEWARE = [
 # DRF 설정
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',  # 세션 인증 (기본 제공)
+        'rest_framework.authentication.BasicAuthentication',    # 기본 인증 (기본 제공)
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT 인증 사용 시
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # 인증된 사용자만 접근 허용
     ),
 }
 

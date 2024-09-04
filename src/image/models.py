@@ -11,3 +11,6 @@ class Image(BaseModel):
 
     def __str__(self):
         return self.url
+
+    class Meta:
+        db_table = "image"

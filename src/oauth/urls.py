@@ -1,8 +1,10 @@
 from django.urls import path
-from .views import kakao_redirect, kakao_login
+from rest_framework_simplejwt.views import TokenRefreshView
+from .views import KakaoRedirectView, KakaoLoginView
 
 
 urlpatterns = [
-    path("login/", kakao_redirect, name="kakao_login"),
-    path("token/", kakao_login),
+    path("login/", KakaoRedirectView.as_view()),
+    path("token/", KakaoLoginView.as_view()),
+    path("refresh/", TokenRefreshView.as_view()),
 ]
