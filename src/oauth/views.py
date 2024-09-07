@@ -34,10 +34,9 @@ class KakaoLoginView(APIView):
         user_profile = get_user_profile_from_kakao(code)
         Logger.debug(f"user profile : {user_profile}")
 
-        kakao_oid = user_profile.get("id")
-        kakao_account = user_profile.get("kakao_account")
-        email = kakao_account.get("email")
-        nickname = UserUtil.generate_random_kor_nickname()
+        email, kakao_oid, nickname = get_user_info_by_profile(user_profile)
+        Logger.info(f"email : {email} | nickname : {nickname}")
+        Logger.debug(f"kakao_oid : {kakao_oid}")
 
         user, _ = get_or_create_member(email, kakao_oid, nickname)
         Logger.debug(f"user created -> id : {user.id}")
@@ -49,6 +48,18 @@ class KakaoLoginView(APIView):
         )
 
         return Response(data=user_jwt, status=status.HTTP_200_OK)
+
+
+def get_user_info_by_profile(user_profile):
+    kakao_oid = user_profile.get("id")
+    kakao_account = user_profile.get("kakao_account")
+
+    if not kakao_account:
+        raise AttributeError("Kakao account can not be None")
+
+    email = kakao_account.get("email")
+    nickname = UserUtil.generate_random_kor_nickname()
+    return email, kakao_oid, nickname
 
 
 def get_user_profile_from_kakao(code):
