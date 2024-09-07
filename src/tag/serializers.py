@@ -5,10 +5,10 @@ from .models import Tag
 class TagCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['word', 'diary']
+        fields = ["word", "diary"]
 
 
 class TagUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['word']
+        fields = ["word"]

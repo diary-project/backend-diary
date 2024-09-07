@@ -1,11 +1,12 @@
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from common.models import BaseModel
 from .managers import CustomUserManager
 import uuid
 
 
-class User(AbstractBaseUser, BaseModel):
+class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     password = models.CharField(null=True, max_length=128)

@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from drf_yasg import openapi
@@ -23,7 +24,7 @@ from rest_framework import permissions
 schema_view = get_schema_view(
     openapi.Info(
         title="Diary Project API",
-        default_version='v1',
+        default_version="v1",
         description="This is Swagger Docs of Diary Project",
         contact=openapi.Contact(email="v4chelsea@gmail.com"),
         license=openapi.License(name="MIT License"),
@@ -35,13 +36,17 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     # admin
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     # Swagger UI:
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-
-    path('diary/', include('diary.urls')),
-    path('image/', include('image.urls')),
-    path('tag/', include('tag.urls')),
-    path('oauth/', include('oauth.urls')),
+    path(
+        "swagger/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    path("diary/", include("diary.urls")),
+    path("image/", include("image.urls")),
+    path("tag/", include("tag.urls")),
+    path("oauth/", include("oauth.urls")),
+    path("user/", include("user.urls")),
 ]

@@ -10,6 +10,6 @@ class TokenUtil:
         refresh_token = str(refresh)  # Refresh Token
 
         return {
-            'access': access_token,
-            'refresh': refresh_token,
+            "access": access_token,
+            "refresh": refresh_token,
         }

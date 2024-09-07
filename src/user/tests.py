@@ -11,7 +11,7 @@ class UserModelTest(TestCase):
         User.objects.create(
             email=email_to_create,
             nickname=nickname_to_create,
-            kakao_oid=kakako_oid_to_create
+            kakao_oid=kakako_oid_to_create,
         )
 
     def test_create_user(self):
