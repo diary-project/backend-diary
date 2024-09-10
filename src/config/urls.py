@@ -44,9 +44,11 @@ urlpatterns = [
         name="schema-swagger-ui",
     ),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
-    path("diary/", include("diary.urls")),
-    path("image/", include("image.urls")),
-    path("tag/", include("tag.urls")),
-    path("oauth/", include("oauth.urls")),
-    path("user/", include("user.urls")),
+    path("api/v1/", include([
+        path("diary/", include("diary.urls")),
+        path("image/", include("image.urls")),
+        path("tag/", include("tag.urls")),
+        path("oauth/", include("oauth.urls")),
+        path("user/", include("user.urls")),
+    ])),
 ]
