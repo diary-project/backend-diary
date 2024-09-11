@@ -13,7 +13,7 @@ class Diary(BaseModel):
         ('snowy', '눈'),
     ]
 
-    date = models.DateField(primary_key=True, default=timezone.now)
+    date = models.DateField(primary_key=True, auto_now_add=True)
     content = models.TextField(blank=True)
     weather = models.CharField(max_length=10, choices=WEATHER_CHOICES)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -22,4 +22,7 @@ class Diary(BaseModel):
         db_table = "diary"
         indexes = [
             models.Index(fields=['user', 'date'])
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'date'])
         ]
