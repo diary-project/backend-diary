@@ -1,78 +1,183 @@
-from datetime import datetime
 from django.utils import timezone
-from django.core.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .serializers import (
-    DiaryDateSerializer,
-    DiaryDetailSerializer,
-    DiaryCombinedSerializer,
-    DiaryCreateSerializer,
-    DiaryUpdateSerializer,
-)
-from .models import Diary
+from .serializers.request_serializers import (RequestFullDiarySerializer,
+                                              RequestDiaryCreateSerializer,
+                                              RequestDiaryUpdateSerializer,
+                                              RequestDiaryDeleteSerializer)
+from .serializers.response_serializers import (ResponseDiaryDateSerializer,
+                                               ResponseFullDiarySerializer,
+                                               ResponseCreateDiarySerializer,
+                                               ResponseUpdateDiarySerializer)
 
-
-class DiariesMixinAPIView(generics.ListAPIView):
-    serializer_class = DiaryDateSerializer
-
-    def get_queryset(self):
-        today = timezone.now()
-        user = self.request.user
-
-        # GET 요청에서 연도와 월을 가져옵니다. 없으면 기본값으로 현재 연도와 월을 사용합니다.
-        year = self.request.query_params.get("year", today.year)
-        month = self.request.query_params.get("month", today.month)
-
-        return Diary.objects.filter(user=user, date__year=year, date__month=month)
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+from .services import (get_diary, get_diary_date_by_year_month,
+                       create_diary, update_diary, delete_diary)
 
 
-class DiaryCreateMixinAPIView(generics.CreateAPIView):
-    serializer_class = DiaryCreateSerializer
+class DiaryRetrieveUpdateDeleteAPIView(APIView):
+    def get(self, request, date: str):
+        diary = get_diary(user_id=request.user.id, date=date)
+        serializer = ResponseFullDiarySerializer(instance=diary)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+    def put(self, request, date: str):
+        content = request.data.get("content", None)
+        weather = request.data.get("weather", None)
+
+        data = {
+            "date": date,
+            "content": content,
+            "weather": weather
+        }
+
+        serializer = RequestDiaryUpdateSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        updated_diary = update_diary(user=request.user, date=date, content=content, weather=weather)
+        updated_diary_serializer = ResponseUpdateDiarySerializer(instance=updated_diary)
+
+        return Response(data=updated_diary_serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, date: str):
+        delete_diary(user=request.user, date=date)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class DiaryMixinAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Diary.objects.all()
-    # serializer_class = DiaryDetailSerializer
-    serializer_class = DiaryCombinedSerializer
-    lookup_field = "date"
+class DiaryDateListCreateAPIView(APIView):
+    def get(self, request):
+        year = request.query_params.get('year')
+        month = request.query_params.get('month')
 
-    def get_serializer_class(self):
-        if self.request.method == "PUT":
-            return DiaryUpdateSerializer
-        return DiaryCombinedSerializer
-        # return DiaryDetailSerializer
+        if not year or not month:
+            return Response({"error": "Year and month are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_object(self):
-        # 쿼리 파라미터에서 'date' 값을 가져옵니다.
-        date_str = self.request.query_params.get("date")
+        diary_query_set = get_diary_date_by_year_month(user_id=request.user.id, year=year, month=month)
+        diary_date_serializer = ResponseDiaryDateSerializer(diary_query_set, many=True)
 
-        if not date_str:
-            raise ValidationError("Date query parameter is required.")
+        return Response(data=diary_date_serializer.data, status=status.HTTP_200_OK)
 
-        # date_str을 DateField로 변환합니다.
-        try:
-            date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
-        except ValueError:
-            raise ValidationError(
-                f"Invalid date format: {date_str}. Expected format: YYYY-MM-DD"
-            )
+    def post(self, request):
+        content = request.data.get("content")
+        weather = request.data.get("weather")
 
-        # 변환된 date_obj로 객체를 조회합니다.
-        return get_object_or_404(self.queryset, date=date_obj)
+        data = {
+            "content": content,
+            "weather": weather
+        }
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+        serializer = RequestDiaryCreateSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        created_diary = create_diary(user=request.user, content=content, weather=weather)
+        created_diary_serializer = ResponseCreateDiarySerializer(instance=created_diary)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+        return Response(data=created_diary_serializer.data, status=status.HTTP_201_CREATED)
+
+
+# class DiaryDateListAPIView(APIView):
+#     def get(self, request, year: int, month: int):
+#         diary_query_set = get_diary_date_by_year_month(user_id=request.user.id, year=year, month=month)
+#         diary_date_serializer = ResponseDiaryDateSerializer(data=diary_query_set, many=True)
+#
+#         return Response(data=diary_date_serializer.data, status=status.HTTP_200_OK)
+#
+#
+# class DiaryAPIView(APIView):
+#     def get(self, request, date: str):
+#         data = {"date": date}
+#         request_full_diary_serializer = RequestFullDiarySerializer(data=data)
+#         request_full_diary_serializer.is_valid()
+#
+#         diary = get_diary(user_id=request.user.id, date=request_full_diary_serializer.data["date"])
+#         response_full_diary_serializer = ResponseFullDiarySerializer(instance=diary)
+#
+#         return Response(data=response_full_diary_serializer.data, status=status.HTTP_200_OK)
+#
+#
+#
+#
+#
+# class DiaryUpdateAPIVIew(APIView):
+#     def update(self, request, date: str):
+#         content = request.data.get("content", None)
+#         weather = request.data.get("weather", None)
+#
+#         data = {
+#             "date": date,
+#             "content": content,
+#             "weather": weather
+#         }
+#
+#         serializer = RequestDiaryUpdateSerializer(data=data)
+#         serializer.is_valid(raise_exception=True)
+#
+#         updated_diary = update_diary(user=request.user, date=date, content=content, weather=weather)
+#         updated_diary_serializer = ResponseUpdateDiarySerializer(instance=updated_diary)
+#
+#         return Response(data=updated_diary_serializer.data, status=status.HTTP_200_OK)
+#
+#
+# class DiaryDeleteAPIView(APIView):
+#     def delete(self, request, date: str):
+#         data = {"date": date}
+#         serializer = RequestDiaryDeleteSerializer(data=data)
+#         serializer.is_valid(raise_exception=True)
+#
+#         delete_diary(user=request.user, date=date)
+#
+#         return Response(status=status.HTTP_200_OK)
+
+
+# class DiaryListAPIView(generics.ListAPIView):
+#     serializer_class = DiaryDateSerializer
+#
+#     def get_queryset(self):
+#         today = timezone.now()
+#         user = self.request.user
+#
+#         # GET 요청에서 연도와 월을 가져옵니다. 없으면 기본값으로 현재 연도와 월을 사용합니다.
+#         year = self.request.query_params.get("year", today.year)
+#         month = self.request.query_params.get("month", today.month)
+#
+#         return Diary.objects.filter(user=user, date__year=year, date__month=month)
+#
+#     def get(self, request, *args, **kwargs):
+#         return self.list(request, *args, **kwargs)
+#
+#
+# class DiaryCreateAPIView(generics.CreateAPIView):
+#     serializer_class = DiaryCreateUpdateSerializer
+#
+#     def post(self, request, *args, **kwargs):
+#         return self.create(request, *args, **kwargs)
+#
+#     def perform_create(self, serializer):
+#         serializer.save(user=self.request.user)
+#
+#
+# class DiaryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Diary.objects.all()
+#     serializer_class = DiaryCombinedSerializer
+#     permission_classes = [IsAuthenticated]
+#     lookup_field = "date"
+#
+#     def get_serializer_class(self):
+#         if self.request.method == "PUT":
+#             return DiaryUpdateSerializer
+#         return DiaryCombinedSerializer
+#
+#     def get_queryset(self):
+#         user = self.request.user
+#         return super().get_queryset().filter(user=user)
+#
+#     def get(self, request, *args, **kwargs):
+#         return self.retrieve(request, *args, **kwargs)
+#
+#     def put(self, request, *args, **kwargs):
+#         return self.update(request, *args, **kwargs)
+#
+#     def delete(self, request, *args, **kwargs):
+#         return self.destroy(request, *args, **kwargs)

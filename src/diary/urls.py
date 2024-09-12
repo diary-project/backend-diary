@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import DiaryMixinAPIView, DiariesMixinAPIView, DiaryCreateMixinAPIView
+from .views import DiaryRetrieveUpdateDeleteAPIView, DiaryDateListCreateAPIView
+
 
 urlpatterns = [
-    path("add/", DiaryCreateMixinAPIView.as_view()),
-    path("detail/", DiaryMixinAPIView.as_view()),
-    path("", DiariesMixinAPIView.as_view()),
+    path("<str:date>/", DiaryRetrieveUpdateDeleteAPIView.as_view(), name="diary-detail"),
+    path("", DiaryDateListCreateAPIView.as_view(), name="diary-list"),
 ]
