@@ -13,15 +13,14 @@ class ResponseDiaryDateSerializer(serializers.ModelSerializer):
         "dates": ["2024-08-12", "2024-08-13", ...]
     }
     """
+    dates = serializers.SerializerMethodField()
+
+    def get_dates(self, obj):
+        return Diary.objects.values_list("date", flat=True)
+
     class Meta:
         model = Diary
-        fields = ["date"]
-
-    def to_representation(self, instance):
-        # instance는 queryset입니다.
-        response = super().to_representation(instance)
-        dates = [item["date"] for item in response]  # 모든 date만 추출
-        return {"date": dates}
+        fields = ["dates"]
 
 
 class ResponseFullDiarySerializer(serializers.ModelSerializer):
@@ -32,16 +31,20 @@ class ResponseFullDiarySerializer(serializers.ModelSerializer):
         "date": str
         "content": str
         "weather": str
-        "tags": {
-            [
-                "word": "hello",
-                "word": "world"
-            ]
-        }
+        "tags": ["hello", "world"]
+        "images": ["https://imageurl.com"]
     }
     """
-    images = ImageUrlSerializer(many=True, read_only=True)
-    tags = TagWordSerializer(many=True, read_only=True)
+    images = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
+
+    def get_tags(self, obj):
+        tags = obj.tags.all()
+        return [tag["word"] for tag in TagWordSerializer(tags, many=True).data]
+
+    def get_images(self, obj):
+        urls = obj.images.all()
+        return [image["url"] for image in ImageUrlSerializer(urls, many=True).data]
 
     class Meta:
         model = Diary

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ImageCreateUpdateMixinAPIView
+from .views import ImageCreateUpdateAPIView
 
 
-urlpatterns = [path("", ImageCreateUpdateMixinAPIView.as_view())]
+urlpatterns = [path("", ImageCreateUpdateAPIView.as_view())]

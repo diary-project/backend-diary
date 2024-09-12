@@ -5,7 +5,7 @@ from user.models import User
 
 
 def get_diary(user_id: str, date: str) -> Diary:
-    return Diary.objects.filter(Q(user_id=user_id) & Q(date=date))
+    return Diary.objects.get(user_id=user_id, date=date)
 
 
 def get_diaries(user_id: str, date: str) -> QuerySet[Diary]:
@@ -27,7 +27,9 @@ def update_diary(user: User, date: str, content: str = None, weather: str = None
     update_fields = _get_update_fields(content=content, weather=weather)
 
     if update_fields:
-        diary.objects.update(**update_fields)
+        for field, value in update_fields.items():
+            setattr(diary, field, value)
+        diary.save()
 
     return diary
 

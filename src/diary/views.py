@@ -1,4 +1,6 @@
 from django.utils import timezone
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -18,11 +20,27 @@ from .services import (get_diary, get_diary_date_by_year_month,
 
 
 class DiaryRetrieveUpdateDeleteAPIView(APIView):
+
+    @swagger_auto_schema(
+        operation_description="Retrieve a diary entry by date",
+        responses={200: ResponseFullDiarySerializer()},
+        manual_parameters=[
+            openapi.Parameter('date', openapi.IN_PATH, description="Date of the diary", type=openapi.TYPE_STRING)
+        ]
+    )
     def get(self, request, date: str):
         diary = get_diary(user_id=request.user.id, date=date)
-        serializer = ResponseFullDiarySerializer(instance=diary)
+        serializer = ResponseFullDiarySerializer(diary)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description="Update a diary entry by date",
+        request_body=RequestDiaryUpdateSerializer,
+        responses={200: ResponseUpdateDiarySerializer()},
+        manual_parameters=[
+            openapi.Parameter('date', openapi.IN_PATH, description="Date of the diary", type=openapi.TYPE_STRING)
+        ]
+    )
     def put(self, request, date: str):
         content = request.data.get("content", None)
         weather = request.data.get("weather", None)
@@ -41,12 +59,27 @@ class DiaryRetrieveUpdateDeleteAPIView(APIView):
 
         return Response(data=updated_diary_serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description="Delete a diary entry by date",
+        responses={204: 'No Content'},
+        manual_parameters=[
+            openapi.Parameter('date', openapi.IN_PATH, description="Date of the diary", type=openapi.TYPE_STRING)
+        ]
+    )
     def delete(self, request, date: str):
         delete_diary(user=request.user, date=date)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class DiaryDateListCreateAPIView(APIView):
+    @swagger_auto_schema(
+        operation_description="List all diary entries for a specific year and month",
+        responses={200: ResponseDiaryDateSerializer(many=True)},
+        manual_parameters=[
+            openapi.Parameter('year', openapi.IN_QUERY, description="Year of the diary entries", type=openapi.TYPE_STRING),
+            openapi.Parameter('month', openapi.IN_QUERY, description="Month of the diary entries", type=openapi.TYPE_STRING)
+        ]
+    )
     def get(self, request):
         year = request.query_params.get('year')
         month = request.query_params.get('month')
@@ -55,10 +88,15 @@ class DiaryDateListCreateAPIView(APIView):
             return Response({"error": "Year and month are required."}, status=status.HTTP_400_BAD_REQUEST)
 
         diary_query_set = get_diary_date_by_year_month(user_id=request.user.id, year=year, month=month)
-        diary_date_serializer = ResponseDiaryDateSerializer(diary_query_set, many=True)
+        data = {"dates": list(diary_query_set.values_list("date", flat=True))}
 
-        return Response(data=diary_date_serializer.data, status=status.HTTP_200_OK)
+        return Response(data=data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description="Create a new diary entry",
+        request_body=RequestDiaryCreateSerializer,
+        responses={201: ResponseCreateDiarySerializer()},
+    )
     def post(self, request):
         content = request.data.get("content")
         weather = request.data.get("weather")
