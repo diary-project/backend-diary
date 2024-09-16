@@ -1,3 +1,5 @@
+# 스크립트가 에러 발생 시 종료하도록 설정
+set -e
 
 # 변수 선언
 DOCKER_USER="geuttaen"

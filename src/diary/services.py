@@ -1,11 +1,16 @@
 from django.db.models import Q, QuerySet
+from django.core.exceptions import ObjectDoesNotExist
 
+from diary.exceptions import DiaryNotFoundException, DiaryErrorCode
 from diary.models import Diary
 from user.models import User
 
 
 def get_diary(user_id: str, date: str) -> Diary:
-    return Diary.objects.get(user_id=user_id, date=date)
+    try:
+        return Diary.objects.get(user_id=user_id, date=date)
+    except ObjectDoesNotExist:
+        raise DiaryNotFoundException(DiaryErrorCode.DIARY_NOT_FOUND)
 
 
 def get_diaries(user_id: str, date: str) -> QuerySet[Diary]:

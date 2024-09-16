@@ -1,14 +1,12 @@
 from rest_framework import status
-
-from common.exceptions import BaseAPIException, BaseErrorCode
+from rest_framework.status import HTTP_404_NOT_FOUND
+from common.exceptions.error_codes import BaseErrorCode
+from common.exceptions.exceptions import CustomException
 
 
 class DiaryErrorCode(BaseErrorCode):
-    DIARY_NOT_FOUND = "조회된 일기가 없습니다."
+    DIARY_NOT_FOUND = ("조회된 일기가 없습니다.", HTTP_404_NOT_FOUND)
 
 
-class DiaryNotFoundException(BaseAPIException):
-    status_code = status.HTTP_404_NOT_FOUND
-
-    def __init__(self, error_code: DiaryErrorCode = DiaryErrorCode.DIARY_NOT_FOUND):
-        super().__init__(error_code=error_code)
+class DiaryNotFoundException(CustomException):
+    pass

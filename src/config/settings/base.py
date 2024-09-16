@@ -62,7 +62,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # Custom Middleware
     "corsheaders.middleware.CorsMiddleware",
+    # "common.middleware.CustomResponseMiddleware",
+
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -70,6 +73,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
 ]
 
 # DRF 설정
@@ -82,6 +86,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",  # 인증된 사용자만 접근 허용
     ),
+    'EXCEPTION_HANDLER': 'common.exception_handler.custom_exception_handler',
+
 }
 
 ROOT_URLCONF = "config.urls"
