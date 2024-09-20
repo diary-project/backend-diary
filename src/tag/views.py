@@ -1,5 +1,5 @@
 from rest_framework import generics
-from .serializers import TagCreateSerializer, TagUpdateSerializer
+from tag.serializers import TagCreateSerializer, TagUpdateSerializer
 
 
 class TagCreateUpdateMixinAPIView(generics.CreateAPIView, generics.UpdateAPIView):

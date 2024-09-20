@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import DiaryRetrieveUpdateDeleteAPIView, DiaryDateListCreateAPIView
+from diary.views import DiaryRetrieveUpdateDeleteAPIView, DiaryDateListCreateAPIView
 
 
 urlpatterns = [

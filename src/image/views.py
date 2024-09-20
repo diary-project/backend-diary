@@ -1,5 +1,5 @@
 from rest_framework import generics, mixins
-from .serializers import ImageCreateSerializer, ImageUpdateSerializer
+from image.serializers import ImageCreateSerializer, ImageUpdateSerializer
 
 
 class ImageCreateUpdateAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin, generics.GenericAPIView):

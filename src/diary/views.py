@@ -15,6 +15,7 @@ from diary.serializers.response_serializers import (ResponseDiaryDateSerializer,
 
 from diary.services import (get_diary, get_diary_date_by_year_month,
                             create_diary, update_diary, delete_diary)
+from tag.services import generate_tags
 
 
 class DiaryRetrieveUpdateDeleteAPIView(APIView):
@@ -108,6 +109,7 @@ class DiaryDateListCreateAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         created_diary = create_diary(user=request.user, content=content, weather=weather)
-        created_diary_serializer = ResponseCreateDiarySerializer(instance=created_diary)
+        generate_tags.delay(created_diary)
 
+        created_diary_serializer = ResponseCreateDiarySerializer(instance=created_diary)
         return create_success_response(data=created_diary_serializer.data, status=status.HTTP_201_CREATED)

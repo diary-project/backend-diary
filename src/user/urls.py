@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import UserNicknameMixinAPIView, UserNicknameAPIView
+from user.views import UserNicknameMixinAPIView, UserNicknameAPIView
 
 
 urlpatterns = [

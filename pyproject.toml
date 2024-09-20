@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "diary-backend-project"
+name = "diary-backend"
 version = "0.1.0"
 description = ""
 authors = ["Dae-Jeong <v4chelsea@gmail.com>"]
@@ -8,18 +8,22 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 django = "^5.1"
-django-restframework = "^0.0.1"
 django-allauth = "^64.1.0"
 djangorestframework-simplejwt = "^5.3.1"
 drf-yasg = "^1.21.7"
 django-cors-headers = "^4.4.0"
-setuptools = "^74.0.0"
+setuptools = "75.1.0"
 requests = "^2.32.3"
 mysqlclient = "^2.2.4"
+celery = {extras = ["redis"], version = "^5.4.0"}
+redis = "^5.0.8"
+djangorestframework = "^3.15.2"
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
+isort = "^5.13.2"
+mypy = "^1.11.2"
 
 [build-system]
 requires = ["poetry-core"]

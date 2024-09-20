@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Image
+from image.models import Image
 
 
 class ImageUrlSerializer(serializers.ModelSerializer):

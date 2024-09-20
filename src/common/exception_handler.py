@@ -1,7 +1,7 @@
 from rest_framework.views import exception_handler
 
-from common.exceptions.error_codes import BaseErrorCode
-from common.exceptions.exceptions import CustomException
+from common.exceptions.error_codes import ErrorCode
+from common.exceptions import CustomException
 from common.responses import create_fail_response
 
 
@@ -16,4 +16,4 @@ def custom_exception_handler(exc, context):
         return response
 
     # 처리되지 않은 예외의 경우 기본 500 응답
-    return create_fail_response(BaseErrorCode.INTERNAL_SERVER_ERROR)
+    return create_fail_response(ErrorCode.INTERNAL_SERVER_ERROR)

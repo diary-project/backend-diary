@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import User
-from .serializers import UserNicknameSerializer
+from user.models import User
+from user.serializers import UserNicknameSerializer
 
 
 class UserNicknameMixinAPIView(generics.RetrieveAPIView):
