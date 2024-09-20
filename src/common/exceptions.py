@@ -1,4 +1,19 @@
+from typing import Dict
+
 from rest_framework import status
+
+
+class ErrorDetail:
+    def __init__(self, code: str, message: str, http_status_code: int):
+        self._data = {
+            "code": code,
+            "message": message,
+            "http_status_code": http_status_code,
+        }
+
+    @property
+    def data(self) -> Dict:
+        return self._data
 
 
 class CustomException(Exception):
@@ -11,6 +26,10 @@ class CustomException(Exception):
         self._code: str = code
         self._message: str = message
         self._http_status_code: int = http_status_code
+
+    @property
+    def detail(self) -> ErrorDetail:
+        return ErrorDetail(self._code, self._message, self._http_status_code)
 
 
 class InternalServerError(CustomException):

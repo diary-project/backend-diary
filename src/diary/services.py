@@ -1,5 +1,5 @@
 from django.db.models import Q, QuerySet
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 from diary.exceptions import DiaryNotFoundException
 from diary.models import Diary
@@ -11,6 +11,8 @@ def get_diary(user_id: str, date: str) -> Diary:
         return Diary.objects.get(user_id=user_id, date=date)
     except ObjectDoesNotExist:
         raise DiaryNotFoundException()
+    except MultipleObjectsReturned:
+        raise
 
 
 def get_diaries(user_id: str, date: str) -> QuerySet[Diary]:
