@@ -4,36 +4,65 @@ services:
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: rlaeowjd1!
-      MYSQL_DATABASE: diary_app
-      MYSQL_USER: user
-      MYSQL_PASSWORD: rlaeowjd1!
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "13306:3306"
+      - "13306:3306"  # 호스트의 3306 포트를 컨테이너의 3306 포트에 매핑
     volumes:
       - db_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
-  web:
-    build: .
-    command: bash -c "python src/manage.py migrate && python src/manage.py runserver 0.0.0.0:8000"
+  diary_app:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Dockerfile 경로가 다를 경우 수정
     volumes:
-      - .:/app
+      - static_volume:/app/static  # static 파일 볼륨
+      - media_volume:/app/media  # media 파일 볼륨 (필요시)
     ports:
       - "18000:8000"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     environment:
-      DB_NAME: diary_app
-      DB_USER: user
-      DB_PASSWORD: rlaeowjd1!
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_HOST: db
-      DB_PORT: 13306
+      DB_PORT: 3306  # db 서비스 내의 MySQL 기본 포트 사용
+    env_file:
+      - resources/envs/.env  # 환경 변수 파일 설정
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_container
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./resources/nginx/nginx.conf:/etc/nginx/nginx.conf:ro  # Nginx 기본 설정 파일 매핑
+      - static_volume:/app/static:ro  # 읽기 전용 설정
+      - media_volume:/app/media:ro  # 읽기 전용 설정
+      - ./resources/ssl/localhost.pem:/etc/nginx/ssl/localhost.pem:ro  # 읽기 전용 설정
+      - ./resources/ssl/localhost-key.pem:/etc/nginx/ssl/localhost-key.pem:ro  # 읽기 전용 설정
+    environment:
+      SERVER_NAME: diary_app  # diary_app 서비스 이름으로 지정
+      SERVER_PORT: 8000  # Django Gunicorn 포트 설정
+    depends_on:
+      - diary_app
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always  # 자동 재시작 설정
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
 
 volumes:
   db_data:
+  static_volume:
+  media_volume:

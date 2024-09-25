@@ -15,6 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from drf_yasg import openapi
@@ -44,11 +46,16 @@ urlpatterns = [
         name="schema-swagger-ui",
     ),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
-    path("api/v1/", include([
-        path("diary/", include("diary.urls")),
-        path("image/", include("image.urls")),
-        path("tag/", include("tag.urls")),
-        path("oauth/", include("oauth.urls")),
-        path("user/", include("user.urls")),
-    ])),
-]
+    path(
+        "api/v1/",
+        include(
+            [
+                path("diary/", include("diary.urls")),
+                path("image/", include("image.urls")),
+                path("tag/", include("tag.urls")),
+                path("oauth/", include("oauth.urls")),
+                path("user/", include("user.urls")),
+            ]
+        ),
+    ),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

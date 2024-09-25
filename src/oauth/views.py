@@ -30,6 +30,15 @@ class KakaoLoginView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        """
+        카카오 로그인 후 콜백 URL로 code를 받아서 처리하는 로직
+
+        1. code를 받아서 카카오에게 access token을 요청
+        2. access token을 받아서 유효성 검사
+        3. access token을 이용해서 사용자 정보 요청
+        4. 사용자 정보로 유저 생성
+        5. Token 생성 및 반환
+        """
         code = request.GET.get("code")
         user_profile = get_user_profile_from_kakao(code)
         Logger.debug(f"user profile : {user_profile}")
@@ -51,6 +60,12 @@ class KakaoLoginView(APIView):
 
 
 def get_user_info_by_profile(user_profile):
+    """
+    카카오 프로필 정보를 받아서 유저 정보를 추출하는 로직
+
+    :param user_profile: 카카오 프로필 정보
+    :return: email, kakao_oid, nickname
+    """
     kakao_oid = user_profile.get("id")
     kakao_account = user_profile.get("kakao_account")
 
@@ -63,6 +78,12 @@ def get_user_info_by_profile(user_profile):
 
 
 def get_user_profile_from_kakao(code):
+    """
+    카카오에게 code를 이용해서 사용자 정보를 요청하는 로직
+
+    :param code: 카카오에서 받은 code
+    :return: 사용자 정보
+    """
     access_token = request_kakao_access_token(code)
     Logger.debug(f"kakao access token : {access_token}")
 
@@ -74,6 +95,12 @@ def get_user_profile_from_kakao(code):
 
 
 def request_kakao_access_token(code):
+    """
+    카카오에게 code를 이용해서 access token을 요청하는 로직
+
+    :param code: 카카오에서 받은 code
+    :return: access token
+    """
     headers = {
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
     }
@@ -97,6 +124,11 @@ def request_kakao_access_token(code):
 
 
 def validate_kakao_access_token(access_token):
+    """
+    카카오에게 access token을 이용해서 유효성 검사하는 로직
+
+    :param access_token: 카카오에서 받은 access token
+    """
     headers = {
         "Authorization": f"Bearer {access_token}",
         "client_secret": KakaoCodes.CLIENT_SECRET,
@@ -111,6 +143,12 @@ def validate_kakao_access_token(access_token):
 
 
 def request_kakao_user_info(access_token):
+    """
+    카카오에게 access token을 이용해서 사용자 정보를 요청하는 로직
+
+    :param access_token: 카카오에서 받은 access token
+    :return: 사용자 정보
+    """
     headers = {
         "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
         "Authorization": f"Bearer {access_token}",
