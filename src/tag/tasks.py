@@ -1,5 +1,5 @@
 from diary.models import Diary
-from tag.services import extract_tags as service_extract_tags
+from tag.services import extract_tags_from_diary_content as service_extract_tags
 from image.tasks import image_task
 from celery import shared_task
 

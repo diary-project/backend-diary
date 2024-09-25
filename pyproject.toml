@@ -19,12 +19,46 @@ celery = {extras = ["redis"], version = "^5.4.0"}
 redis = "^5.0.8"
 djangorestframework = "^3.15.2"
 gunicorn = "^23.0.0"
+openai = "^1.47.1"
+python-decouple = "^3.8"
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
 isort = "^5.13.2"
 mypy = "^1.11.2"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+python_version = 3.12
+strict = true # <- 제일 중요한 옵션이래요 / Why?
+
+[[tool.mypy.overrides]]
+module = "*.migrations.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "manage"
+ignore_errors = true
+
+[tool.django-stubs]
+django_settings_module = "oz_django_proj.settings"
+
+[tool.coverage.report]
+fail_under = 80
+
+[tool.coverage.run]
+omit = [
+  ".mypy_cache/**/*",
+  "*/migrations/*",
+  "*/*test*.py",
+]
 
 [build-system]
 requires = ["poetry-core"]

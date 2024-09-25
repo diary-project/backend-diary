@@ -24,7 +24,7 @@ from diary.services import (
     update_diary,
     delete_diary,
 )
-from tag.services import extract_tags
+from tag.tasks import extract_tags
 
 
 class DiaryRetrieveUpdateDeleteAPIView(APIView):
@@ -147,7 +147,7 @@ class DiaryDateListCreateAPIView(APIView):
         created_diary = create_diary(
             user=request.user, content=content, weather=weather
         )
-        extract_tags.delay(created_diary)
+        # extract_tags.delay(created_diary)
 
         created_diary_serializer = ResponseCreateDiarySerializer(instance=created_diary)
         return create_success_response(

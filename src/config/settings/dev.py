@@ -15,13 +15,11 @@ CLIENT_REDIRECT_URL = "http://localhost:5173/oauth/kakao/callback/"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DB_NAME", "diary_db"),
-        "USER": os.environ.get("DB_USER", "geuttaen"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "kJp#dpOFdJCADjLg8Z"),
-        "HOST": os.environ.get(
-            "DB_HOST", "diary-db-dev.c3e4cuegc63x.ap-northeast-2.rds.amazonaws.com"
-        ),
-        "PORT": "3306",
+        "NAME": env("DB_NAME"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASSWORD"),
+        "HOST": env("DB_HOST"),
+        "PORT": env("DB_PORT"),
     }
 }
 
