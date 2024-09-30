@@ -9,6 +9,7 @@ from diary.serializers.request_serializers import (
     RequestDiaryCreateSerializer,
     RequestDiaryUpdateSerializer,
     RequestDiaryDeleteSerializer,
+    RequestDevDiaryCreateSerializer,
 )
 from diary.serializers.response_serializers import (
     ResponseDiaryDateSerializer,
@@ -21,10 +22,13 @@ from diary.services import (
     get_diary,
     get_diary_date_by_year_month,
     create_diary,
+    create_diary_dev,
     update_diary,
     delete_diary,
 )
-from tag.tasks import extract_tags
+from tag.tasks import tag_task
+from image.tasks import image_task
+from utils.log_utils import Logger
 
 
 class DiaryRetrieveUpdateDeleteAPIView(APIView):
@@ -44,6 +48,8 @@ class DiaryRetrieveUpdateDeleteAPIView(APIView):
     def get(self, request, date: str):
         diary = get_diary(user_id=request.user.id, date=date)
         serializer = ResponseFullDiarySerializer(diary)
+
+        Logger.debug(f"DiaryRetrieveUpdateDeleteAPIView - get -> diary : {serializer.data}")
         return create_success_response(data=serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -62,20 +68,19 @@ class DiaryRetrieveUpdateDeleteAPIView(APIView):
     def put(self, request, date: str):
         content = request.data.get("content", None)
         weather = request.data.get("weather", None)
+        user_id = request.user.id
 
-        data = {"date": date, "content": content, "weather": weather}
+        data = {"user": user_id, "date": date, "content": content, "weather": weather}
 
         serializer = RequestDiaryUpdateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        updated_diary = update_diary(
-            user=request.user, date=date, content=content, weather=weather
-        )
+        updated_diary = update_diary(user=request.user, date=date, content=content, weather=weather)
+        Logger.debug(f"DiaryRetrieveUpdateDeleteAPIView - put -> updated diary : {updated_diary}")
+
         updated_diary_serializer = ResponseUpdateDiarySerializer(instance=updated_diary)
 
-        return create_success_response(
-            data=updated_diary_serializer.data, status=status.HTTP_200_OK
-        )
+        return create_success_response(data=updated_diary_serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="Delete a diary entry by date",
@@ -91,6 +96,7 @@ class DiaryRetrieveUpdateDeleteAPIView(APIView):
     )
     def delete(self, request, date: str):
         delete_diary(user=request.user, date=date)
+        Logger.debug(f"DiaryRetrieveUpdateDeleteAPIView - delete -> diary deleted : {date}")
         return create_success_response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -123,10 +129,9 @@ class DiaryDateListCreateAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        diary_query_set = get_diary_date_by_year_month(
-            user_id=request.user.id, year=year, month=month
-        )
+        diary_query_set = get_diary_date_by_year_month(user_id=request.user.id, year=year, month=month)
         data = {"dates": list(diary_query_set.values_list("date", flat=True))}
+        Logger.debug(f"DiaryDateListCreateAPIView - get -> diary dates : {data}")
 
         return create_success_response(data=data, status=status.HTTP_200_OK)
 
@@ -138,18 +143,39 @@ class DiaryDateListCreateAPIView(APIView):
     def post(self, request):
         content = request.data.get("content")
         weather = request.data.get("weather")
+        user_id = request.user.id
 
-        data = {"content": content, "weather": weather}
+        data = {"user": user_id, "content": content, "weather": weather}
 
         serializer = RequestDiaryCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        created_diary = create_diary(
-            user=request.user, content=content, weather=weather
-        )
-        # extract_tags.delay(created_diary)
+        created_diary = create_diary(user=request.user, content=content, weather=weather)
+        Logger.debug(f"DiaryDateListCreateAPIView - post -> created diary : {created_diary}")
 
         created_diary_serializer = ResponseCreateDiarySerializer(instance=created_diary)
-        return create_success_response(
-            data=created_diary_serializer.data, status=status.HTTP_201_CREATED
-        )
+        return create_success_response(data=created_diary_serializer.data, status=status.HTTP_201_CREATED)
+
+
+class DevDiaryCreateView(APIView):
+    @swagger_auto_schema(
+        operation_description="Create a new diary entry for development",
+        request_body=RequestDevDiaryCreateSerializer,
+        responses={201: ResponseCreateDiarySerializer()},
+    )
+    def post(self, request):
+        user_id = request.user.id
+        content = request.data.get("content")
+        weather = request.data.get("weather")
+        date = request.data.get("date")
+
+        data = {"user": user_id, "content": content, "weather": weather, "date": date}
+
+        serializer = RequestDevDiaryCreateSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        created_diary = create_diary_dev(user_id=user_id, content=content, weather=weather, date=date)
+        Logger.debug(f"DiaryDateListCreateAPIView - post -> created diary : {created_diary}")
+
+        created_diary_serializer = ResponseCreateDiarySerializer(instance=created_diary)
+        return create_success_response(data=created_diary_serializer.data, status=status.HTTP_201_CREATED)

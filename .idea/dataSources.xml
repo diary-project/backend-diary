@@ -16,11 +16,11 @@
         </library>
       </libraries>
     </data-source>
-    <data-source source="LOCAL" name="diary_db@diary-db-dev.c3e4cuegc63x.ap-northeast-2.rds.amazonaws.com" uuid="1d3fe38f-2238-4427-903d-45511c726cce">
+    <data-source source="LOCAL" name="diary-dev" uuid="1d3fe38f-2238-4427-903d-45511c726cce">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://diary-db-dev.c3e4cuegc63x.ap-northeast-2.rds.amazonaws.com:3306/diary_db</jdbc-url>
+      <jdbc-url>jdbc:mysql://diary-db-dev.c3e4cuegc63x.ap-northeast-2.rds.amazonaws.com:3306/</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

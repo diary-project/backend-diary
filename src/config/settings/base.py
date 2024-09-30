@@ -84,9 +84,7 @@ REST_FRAMEWORK = {
         # 'rest_framework.authentication.SessionAuthentication',  # 세션 인증 (기본 제공)
         "rest_framework_simplejwt.authentication.JWTAuthentication",  # JWT 인증 사용 시
     ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",  # 인증된 사용자만 접근 허용
-    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),  # 인증된 사용자만 접근 허용
     "EXCEPTION_HANDLER": "common.exception_handler.custom_exception_handler",
 }
 
@@ -161,8 +159,10 @@ AUTH_USER_MODEL = "user.User"
 
 # Redis
 # Celery Settings
-CELERY_BROKER_URL = "redis://redis:6379/0"
-CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+# CELERY_BROKER_URL = "redis://redis:6379/0"
+# CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"

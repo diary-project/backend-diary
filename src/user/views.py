@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 
 from user.models import User
 from user.serializers import UserNicknameSerializer
+from utils.log_utils import Logger
 
 
 class UserNicknameMixinAPIView(generics.RetrieveAPIView):
@@ -14,8 +15,10 @@ class UserNicknameMixinAPIView(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         user_email = request.user.email
         user = User.objects.get(email=user_email)
+        data = {"nickname": user.nickname}
+        Logger.debug(f"UserNicknameMixinAPIView.get - data : {data}")
 
-        return Response(data={"nickname": user.nickname}, status=status.HTTP_200_OK)
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 class UserNicknameAPIView(APIView):

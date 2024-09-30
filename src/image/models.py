@@ -12,5 +12,9 @@ class Image(BaseModel):
     def __str__(self):
         return self.url
 
+    @classmethod
+    def build(cls, prompt: str, url: str, diary: Diary):
+        return cls(prompt=prompt, url=url, diary=diary)
+
     class Meta:
         db_table = "image"

@@ -1,5 +1,5 @@
 from diary.models import Diary
-from tag.services import extract_tags_from_diary_content as service_extract_tags
+from tag.services import extract_tags_from_diary_content
 from image.tasks import image_task
 from celery import shared_task
 
@@ -12,5 +12,5 @@ def tag_task(diary: Diary):
     Args:
         diary (Diary): Diary 인스턴스
     """
-    service_extract_tags(diary)
-    image_task.delay(diary)
+    extract_tags_from_diary_content(diary)
+    # image_task.delay(diary)

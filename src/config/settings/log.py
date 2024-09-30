@@ -25,17 +25,17 @@ LOGGING = {
         },
         "diary": {  # 특정 앱의 로깅
             "handlers": ["console"],
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": False,
         },
         "image": {  # 특정 앱의 로깅
             "handlers": ["console"],
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": False,
         },
         "tag": {  # 특정 앱의 로깅
             "handlers": ["console"],
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": False,
         },
         "oauth": {  # 특정 앱의 로깅
@@ -45,7 +45,7 @@ LOGGING = {
         },
         "utils": {  # 특정 앱의 로깅
             "handlers": ["console"],
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": False,
         },
     },

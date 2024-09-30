@@ -15,6 +15,10 @@ class ErrorDetail:
     def data(self) -> Dict:
         return self._data
 
+    @classmethod
+    def build(cls, code: str, message: str, http_status_code: int):
+        return cls(code=code, message=message, http_status_code=http_status_code)
+
 
 class CustomException(Exception):
     """
@@ -34,6 +38,4 @@ class CustomException(Exception):
 
 class InternalServerError(CustomException):
     def __init__(self):
-        super().__init__(
-            "SERVER_ERROR", "서버측 오류입니다.", status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        super().__init__("SERVER_ERROR", "서버측 오류입니다.", status.HTTP_500_INTERNAL_SERVER_ERROR)

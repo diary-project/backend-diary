@@ -1,29 +1,25 @@
 from typing import List
 
 from diary.models import Diary
+
 from tag.models import Tag
-from ai.ai_service import generate_text
+from tag.const import MAX_GENERATE_COUNT
+
+from ai.ai_service import OpenAIService
 
 
 def create_tag(tag_name: str, diary: Diary) -> Tag:
     """
     Tag를 생성합니다.
     """
-
-    # Tag 생성
-    tag = Tag.objects.create(name=tag_name, diary=diary)
-    return tag
+    return Tag.objects.create(name=tag_name, diary=diary)
 
 
-def create_tags(tag_name_list: List[str], diary: Diary) -> List[Tag]:
+def create_tags(tag_list: List[Tag]) -> List[Tag]:
     """
     여러개의 Tag를 생성합니다. 여러개의 Tag는 하나의 Diary에 속합니다.
     """
-
-    # Tag 생성
-    tag_list = [Tag(name=tag_name, diary=diary) for tag_name in tag_name_list]
-    created_tag_list = Tag.objects.bulk_create(tag_list)
-    return created_tag_list
+    return Tag.objects.bulk_create(tag_list)
 
 
 def extract_tags_from_diary_content(diary: Diary):
@@ -32,22 +28,44 @@ def extract_tags_from_diary_content(diary: Diary):
     태그 추출은 LLM(Linear Learner Model)을 사용합니다.
     """
 
-    # diary에서 content를 추출하여 인공지능의 Input으로 사용
-    generated_content = generate_text(prompt=diary.content)
+    ai_service = OpenAIService()
+    generate_count = 0
+    tag_list = []
 
-    # 생성된 Tag를 저장
-    tag_name_list = extract_tags_from_generated_content(generated_content)
-    created_tag_list = create_tags(tag_name_list)
+    while generate_count < MAX_GENERATE_COUNT:
+        try:
+            generated_content = ai_service.generate_text(prompt=diary.content)
+            tag_list.extend(build_tags_from_generated_content(generated_content, diary))
+            break
+        except ValueError as e:
+            print(e)
+            generate_count += 1
+            continue
+
+    if generate_count == MAX_GENERATE_COUNT:
+        return tag_list
+
+    # Tag 생성
+    created_tag_list = create_tags(tag_list)
     return created_tag_list
 
 
-def extract_tags_from_generated_content(content: str) -> List[str]:
+def build_tags_from_generated_content(content: str, diary: Diary) -> List[Tag]:
     """
     LLM 모델로 부터 생성된 content에서 태그를 추출합니다.
     """
+    tags = content.split("#")
 
-    # TODO: 생성된 content를 추출하여 Tag 결과물을 추출
+    processed_tags = []
+    for tag in tags:
+        cleaned_tag = tag.strip()
 
-    # 생성된 Tag를 저장
-    tag_list = []
-    return tag_list
+        if not cleaned_tag:
+            raise ValueError("태그가 비어있습니다.")
+        if len(cleaned_tag) > 10:
+            raise ValueError("태그의 길이가 10자를 초과했습니다.")
+
+        processed_tag = Tag.build(word=cleaned_tag, diary=diary)
+        processed_tags.append(processed_tag)
+
+    return processed_tags
