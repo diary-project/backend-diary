@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
+from ai.ai_service import FakeAIService
 from diary.exceptions import DiaryNotFoundException
 from diary.models import Diary
 from user.models import User
@@ -53,13 +54,7 @@ def create_diary(user: User, content: str, weather: str, date: str = None) -> Di
     cache_key = f"diaries:{user.id}:{year}:{month}"
     cache.delete(cache_key)
 
-    # from tag.services import extract_tags_from_diary_content
-    # from image.services import generate_image
-
-    # extract_tags_from_diary_content(diary=created_diary)
-    # generate_image(diary=created_diary)
-
-    # tag_task.delay(created_diary)
+    fake_create_tags_and_image(created_diary)
 
     return created_diary
 
@@ -84,3 +79,14 @@ def delete_diary(user: User, date: str) -> None:
     diary = get_diary(user_id=user.id, date=date)
     if diary:
         diary.delete()
+
+
+def fake_create_tags_and_image(created_diary: Diary) -> None:
+    from tag.services import extract_tags_from_diary_content
+    from image.services import generate_image
+
+    extract_tags_from_diary_content(diary=created_diary, ai_service=FakeAIService())
+    generate_image(diary=created_diary, ai_service=FakeAIService())
+
+
+def create_tags_and_image(created_diary: Diary) -> None: ...

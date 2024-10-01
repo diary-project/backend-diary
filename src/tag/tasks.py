@@ -1,3 +1,4 @@
+from ai.ai_service import OpenAIService
 from diary.models import Diary
 from tag.services import extract_tags_from_diary_content
 from image.tasks import image_task
@@ -12,5 +13,5 @@ def tag_task(diary: Diary):
     Args:
         diary (Diary): Diary 인스턴스
     """
-    extract_tags_from_diary_content(diary)
+    extract_tags_from_diary_content(diary=diary, ai_service=OpenAIService())
     # image_task.delay(diary)

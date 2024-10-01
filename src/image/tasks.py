@@ -1,3 +1,4 @@
+from ai.ai_service import OpenAIService
 from diary.models import Diary
 from image.services import generate_image as service_generate_image
 from celery import shared_task
@@ -5,4 +6,4 @@ from celery import shared_task
 
 @shared_task()
 def image_task(diary: Diary):
-    service_generate_image(diary)
+    service_generate_image(diary=diary, ai_service=OpenAIService())

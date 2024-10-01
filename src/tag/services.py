@@ -5,7 +5,7 @@ from diary.models import Diary
 from tag.models import Tag
 from tag.const import MAX_GENERATE_COUNT
 
-from ai.ai_service import OpenAIService
+from ai.ai_service import AIService
 
 
 def create_tag(tag_name: str, diary: Diary) -> Tag:
@@ -22,13 +22,12 @@ def create_tags(tag_list: List[Tag]) -> List[Tag]:
     return Tag.objects.bulk_create(tag_list)
 
 
-def extract_tags_from_diary_content(diary: Diary):
+def extract_tags_from_diary_content(diary: Diary, ai_service: AIService):
     """
     Diary의 content로 부터 태그를 추출합니다.
     태그 추출은 LLM(Linear Learner Model)을 사용합니다.
     """
 
-    ai_service = OpenAIService()
     generate_count = 0
     tag_list = []
 
@@ -54,18 +53,21 @@ def build_tags_from_generated_content(content: str, diary: Diary) -> List[Tag]:
     """
     LLM 모델로 부터 생성된 content에서 태그를 추출합니다.
     """
-    tags = content.split("#")
+    tags = content.strip().split("#")
 
     processed_tags = []
     for tag in tags:
         cleaned_tag = tag.strip()
 
         if not cleaned_tag:
-            raise ValueError("태그가 비어있습니다.")
+            continue
         if len(cleaned_tag) > 10:
             raise ValueError("태그의 길이가 10자를 초과했습니다.")
 
         processed_tag = Tag.build(word=cleaned_tag, diary=diary)
         processed_tags.append(processed_tag)
+
+    if len(processed_tags) < 3:
+        raise ValueError("태그의 개수가 3개 미만입니다.")
 
     return processed_tags

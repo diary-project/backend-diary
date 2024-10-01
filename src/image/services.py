@@ -1,21 +1,24 @@
 from diary.models import Diary
-from ai.ai_service import OpenAIService
+from ai.ai_service import OpenAIService, AIService
 from image.consts import MAX_GENERATE_COUNT
 from image.models import Image
 
 
-def create_image(image_url: str, diary: Diary, prompt: str = "") -> Image:
+def create_image(image_url: str, diary: Diary, prompt: str) -> Image:
     """
     Image를 생성합니다.
     """
-    return Image.objects.create(prompt=prompt, image_url=image_url, diary=diary)
+    try:
+        return Image.objects.create(prompt=prompt, url=image_url, diary=diary)
+    except Exception as e:
+        print(e)
+        return None
 
 
-def generate_image(diary: Diary):
+def generate_image(diary: Diary, ai_service: AIService):
     """
     Diary에 이미지를 생성합니다.
     """
-    ai_service = OpenAIService()
     generated_image_url = ""
     generate_count = 0
 
@@ -31,5 +34,5 @@ def generate_image(diary: Diary):
     if (generate_count == MAX_GENERATE_COUNT) or (not generated_image_url):
         return None
 
-    created_image = create_image(image_url=generated_image_url, diary=diary)
+    created_image = create_image(image_url=generated_image_url, diary=diary, prompt=diary.content)
     return created_image
