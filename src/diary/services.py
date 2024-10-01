@@ -1,4 +1,8 @@
-from django.db.models import Q, QuerySet
+from typing import List
+
+from django.conf import settings
+from django.core.cache import cache
+from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 from diary.exceptions import DiaryNotFoundException
@@ -8,25 +12,46 @@ from utils.date_utils import DateUtil
 
 
 def get_diary(user_id: str, date: str) -> Diary:
+    cache_key = f"diary:{user_id}:{date}"
+    diary = cache.get(cache_key)
+
+    if diary:
+        return diary
+
     try:
-        return Diary.objects.get(user_id=user_id, date=date)
+        diary = Diary.objects.get(user_id=user_id, date=date)
+        cache.set(cache_key, diary, timeout=settings.CACHE_TIMEOUT)  # 캐시에 저장
+        return diary
     except ObjectDoesNotExist:
         raise DiaryNotFoundException()
     except MultipleObjectsReturned:
         raise
 
 
-def get_diaries(user_id: str, date: str) -> QuerySet[Diary]:
-    return Diary.objects.filter(Q(user_id=user_id) & Q(date=date))
+def get_diary_date_list_by_year_month(user_id: str, year: int, month: int) -> List[str]:
+    cache_key = f"diaries:{user_id}:{year}:{month}"
+
+    # 캐시에서 데이터 가져오기
+    diary_date_list = cache.get(cache_key)
+
+    if diary_date_list is not None:
+        return diary_date_list
+
+    diary_queryset = Diary.objects.filter(Q(user_id=user_id) & Q(date__year=year) & Q(date__month=month))
+    diary_date_list = list(diary_queryset.values_list("date", flat=True))
+    cache.set(cache_key, diary_date_list, timeout=settings.CACHE_TIMEOUT)
+
+    return diary_date_list
 
 
-def get_diary_date_by_year_month(user_id: str, year: int, month: int) -> QuerySet[Diary]:
-    return Diary.objects.filter(Q(user_id=user_id) & Q(date__year=year) & Q(date__month=month))
+def create_diary(user: User, content: str, weather: str, date: str = None) -> Diary:
+    if not date:
+        date = DateUtil.get_today()
+    created_diary = Diary.objects.create(user=user, content=content, weather=weather, date=date)
 
-
-def create_diary(user: User, content: str, weather: str) -> Diary:
-    today = DateUtil.get_today()
-    created_diary = Diary.objects.create(user=user, content=content, weather=weather, date=today)
+    (year, month, _) = date.split("-")
+    cache_key = f"diaries:{user.id}:{year}:{month}"
+    cache.delete(cache_key)
 
     # from tag.services import extract_tags_from_diary_content
     # from image.services import generate_image
@@ -59,9 +84,3 @@ def delete_diary(user: User, date: str) -> None:
     diary = get_diary(user_id=user.id, date=date)
     if diary:
         diary.delete()
-
-
-# =============== DEVELOP FUCTION ==============================================================================
-def create_diary_dev(user_id: str, content: str, weather: str, date: str) -> Diary:
-    created_diary = Diary.objects.create(user_id=user_id, content=content, weather=weather, date=date)
-    return created_diary

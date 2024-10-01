@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "drf_yasg",
     "corsheaders",
+    "django_extensions",
     # User Application
     "diary",
     "image",
@@ -170,3 +171,6 @@ CELERY_TIMEZONE = "Asia/Seoul"  # 원하는 타임존으로 설정
 
 # OpenAI
 OPENAI_API_KEY = env("OPENAI_API_KEY")
+
+# CACHE
+CACHE_TIMEOUT = env("CACHE_TIMEOUT", cast=int)
