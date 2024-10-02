@@ -1,7 +1,7 @@
-from ai.ai_service import OpenAIService
+from ai.ai_service import OpenAIService, FakeAIService
 from diary.models import Diary
 from tag.services import extract_tags_from_diary_content
-from image.tasks import image_task
+from image.tasks import image_task, fake_image_task
 from celery import shared_task
 
 
@@ -14,4 +14,10 @@ def tag_task(diary: Diary):
         diary (Diary): Diary 인스턴스
     """
     extract_tags_from_diary_content(diary=diary, ai_service=OpenAIService())
-    # image_task.delay(diary)
+    image_task.delay(diary)
+
+
+@shared_task()
+def fake_tag_task(diary: Diary):
+    extract_tags_from_diary_content(diary=diary, ai_service=FakeAIService())
+    fake_image_task.delay(diary)

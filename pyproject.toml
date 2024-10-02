@@ -29,6 +29,8 @@ black = "^24.8.0"
 isort = "^5.13.2"
 mypy = "^1.11.2"
 django-extensions = "^3.2.3"
+flower = "^2.0.1"
+werkzeug = "^3.0.4"
 
 [tool.black]
 line-length = 120

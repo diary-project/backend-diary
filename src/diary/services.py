@@ -82,11 +82,12 @@ def delete_diary(user: User, date: str) -> None:
 
 
 def fake_create_tags_and_image(created_diary: Diary) -> None:
-    from tag.services import extract_tags_from_diary_content
-    from image.services import generate_image
+    from tag.tasks import fake_tag_task
 
-    extract_tags_from_diary_content(diary=created_diary, ai_service=FakeAIService())
-    generate_image(diary=created_diary, ai_service=FakeAIService())
+    fake_tag_task(diary=created_diary)
 
 
-def create_tags_and_image(created_diary: Diary) -> None: ...
+def create_tags_and_image(created_diary: Diary) -> None:
+    from tag.tasks import tag_task
+
+    tag_task(diary=created_diary)

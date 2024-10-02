@@ -1,0 +1,50 @@
+# 1. 기본 Python 이미지를 지정합니다.
+FROM python:3.12-slim
+
+# 2. 작업 디렉토리를 설정합니다.
+WORKDIR /app
+ENV PYTHONPATH="/app/src"
+
+# 3. 필수 패키지를 설치합니다.
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    build-essential \
+    libssl-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    wget \
+    llvm \
+    libncurses5-dev \
+    libncursesw5-dev \
+    xz-utils \
+    tk-dev \
+    libffi-dev \
+    liblzma-dev \
+    python3-openssl \
+    default-libmysqlclient-dev \
+    libmariadb-dev-compat \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# 4. Poetry 설치
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# 5. Poetry 환경 설정
+ENV PATH="/root/.local/bin:$PATH"
+
+# 6. 가상 환경 비활성화 및 의존성 설치
+COPY ../pyproject.toml poetry.lock /app/
+RUN poetry config virtualenvs.create false && poetry install --no-root
+
+# 7. Celery가 설치되었는지 확인
+RUN which celery  # Celery가 설치되었는지 확인
+RUN celery --version  # Celery 버전 확인
+
+# 8. 프로젝트 소스 코드 복사
+COPY .. /app
+
+# 9. Celery 작업자 ENTRYPOINT 설정
+CMD ["celery", "-A", "src.config", "worker", "-l", "info"]

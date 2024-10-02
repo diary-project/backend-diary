@@ -36,11 +36,11 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="/root/.local/bin:$PATH"
 
 # 6. 프로젝트 파일 복사 및 의존성 설치
-COPY pyproject.toml poetry.lock /app/
+COPY ../pyproject.toml poetry.lock /app/
 RUN /bin/bash -c "source ~/.bashrc && poetry install --no-root"
 
 # 7. 프로젝트 소스 코드 복사
-COPY . /app
+COPY .. /app
 
 # 8. ENTRYPOINT 설정
 RUN chmod +x ./scripts/start_app.sh
