@@ -24,15 +24,21 @@ DATABASES = {
 }
 
 CACHES = {
+    # "default": {
+    #     "BACKEND": "django_redis.cache.RedisCache",
+    #     "LOCATION": f"redis://{env("CACHE_HOST")}:{env("CACHE_PORT")}/1",
+    #     "OPTIONS": {
+    #         "CLIENT_CLASS": "django_redis.client.DefaultClient",
+    #         "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",  # 캐시 압축
+    #     },
+    # }
+    # settings.py
     "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://{env("CACHE_HOST")}:{env("CACHE_PORT")}/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",  # 캐시 압축
-        },
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "diary-mem-cache",  # 여러 인스턴스에서 구분되는 유니크한 이름
     }
 }
+
 
 # simplejwt setting
 SIMPLE_JWT = {

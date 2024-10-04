@@ -35,16 +35,16 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 # 5. Poetry 환경 설정
 ENV PATH="/root/.local/bin:$PATH"
 
-# 6. 프로젝트 파일 복사 및 의존성 설치
-COPY ../pyproject.toml poetry.lock /app/
-RUN /bin/bash -c "source ~/.bashrc && poetry install --no-root"
+# 6. 가상 환경 비활성화 및 의존성 설치
+COPY pyproject.toml poetry.lock /app/
+RUN poetry config virtualenvs.create false && poetry install --no-root
 
-# 7. 프로젝트 소스 코드 복사
+# 7. Celery가 설치되었는지 확인
+RUN which celery  # Celery가 설치되었는지 확인
+RUN celery --version  # Celery 버전 확인
+
+# 8. 프로젝트 소스 코드 복사
 COPY .. /app
 
-# 8. ENTRYPOINT 설정
-RUN chmod +x ./scripts/start_app.sh
-ENTRYPOINT ["/bin/bash", "./scripts/start_app.sh"]
-
-# 9. Gunicorn이 8000 포트에서 수신하도록 EXPOSE
-EXPOSE 8000
+# 9. Celery 작업자 ENTRYPOINT 설정
+CMD ["celery", "-A", "src.config", "worker", "-l", "info"]

@@ -12,7 +12,7 @@ services:
   celery:
     build:
       context: .
-      dockerfile: docker/Dockerfile-celery  # Celery 전용 Dockerfile 경로
+      dockerfile: Dockerfile-celery  # Celery 전용 Dockerfile 경로
     volumes:
       - static_volume:/app/staticfiles  # 필요한 경우 파일 공유
       - media_volume:/app/staticfiles  # 필요한 경우 파일 공유
@@ -25,7 +25,7 @@ services:
   diary_app:
     build:
       context: .
-      dockerfile: docker/Dockerfile  # Dockerfile 경로가 다를 경우 수정
+      dockerfile: Dockerfile  # Dockerfile 경로가 다를 경우 수정
     volumes:
       - static_volume:/app/staticfiles  # static 파일 볼륨
       - media_volume:/app/staticfiles  # media 파일 볼륨 (필요시)
