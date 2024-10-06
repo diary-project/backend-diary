@@ -17,7 +17,7 @@ def tag_task(diary: Diary):
     image_task.delay(diary)
 
 
-@shared_task()
+# @shared_task()
 def fake_tag_task(diary: Diary):
     extract_tags_from_diary_content(diary=diary, ai_service=FakeAIService())
     fake_image_task.delay(diary)

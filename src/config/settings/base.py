@@ -157,6 +157,27 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # JWT Auth user model
 AUTH_USER_MODEL = "user.User"
 
+SECRET_KEY = "django-insecure-nf+j=6s(uu+qu3_!x1y*)ho)*3dv@^4ebp7!thg-0*&%p4s9re"
+
+# simplejwt setting
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=3),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,  # 변경 필요 / 일단 임시로 SECRET_KEY
+    "VERIFYING_KEY": None,
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "email",  # User Model에서 가져올 클래스 변수 명
+    "USER_ID_CLAIM": "email",  # jwt에 USER_ID_FILED를 적용할 때 활용할 Key 값
+    "SLIDING_TOKEN_LIFETIME": timedelta(hours=3),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+}
+
 
 # Redis
 # Celery Settings
@@ -169,6 +190,3 @@ CELERY_TIMEZONE = "Asia/Seoul"  # 원하는 타임존으로 설정
 
 # OpenAI
 OPENAI_API_KEY = env("OPENAI_API_KEY")
-
-# CACHE
-CACHE_TIMEOUT = env("CACHE_TIMEOUT", cast=int)

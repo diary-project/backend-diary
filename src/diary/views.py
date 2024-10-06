@@ -140,9 +140,8 @@ class DiaryDateListCreateAPIView(APIView):
     def post(self, request):
         content = request.data.get("content")
         weather = request.data.get("weather")
-        user_id = request.user.id
 
-        data = {"user": user_id, "content": content, "weather": weather}
+        data = {"content": content, "weather": weather}
 
         serializer = RequestDiaryCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -161,12 +160,11 @@ class DevDiaryCreateView(APIView):
         responses={201: ResponseCreateDiarySerializer()},
     )
     def post(self, request):
-        user = request.user
         content = request.data.get("content")
         weather = request.data.get("weather")
         date = request.data.get("date")
 
-        data = {"user": user.id, "content": content, "weather": weather, "date": date}
+        data = {"content": content, "weather": weather, "date": date}
 
         serializer = RequestDevDiaryCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)

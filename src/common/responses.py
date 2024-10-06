@@ -4,20 +4,8 @@ from common.exceptions import ErrorDetail
 
 
 class CustomResponse(Response):
-    def __init__(
-        self,
-        data=None,
-        code="SUCCESS",
-        message=None,
-        http_status_code=HTTP_200_OK,
-        **kwargs
-    ):
-        if 400 <= http_status_code < 500:
-            status = "EXCEPTION"
-        elif http_status_code >= 500:
-            status = "ERROR"
-        else:
-            status = "SUCCESS"
+    def __init__(self, data=None, code="SUCCESS", message=None, http_status_code=HTTP_200_OK, **kwargs):
+        status = self._get_status(http_status_code)
 
         response_data = {
             "status": status,
@@ -27,6 +15,15 @@ class CustomResponse(Response):
         }
 
         super().__init__(data=response_data, status=http_status_code, **kwargs)
+
+    @staticmethod
+    def _get_status(http_status_code: int) -> str:
+        """HTTP 상태 코드에 따른 응답 상태 결정"""
+        if 400 <= http_status_code < 500:
+            return "EXCEPTION"
+        elif http_status_code >= 500:
+            return "ERROR"
+        return "SUCCESS"
 
 
 def create_success_response(data=None, status=HTTP_200_OK, **kwargs):

@@ -36,6 +36,11 @@ class CustomException(Exception):
         return ErrorDetail(self._code, self._message, self._http_status_code)
 
 
+class InternalClientError(CustomException):
+    def __init__(self, message: str, http_status_code: int):
+        super().__init__("CLIENT_ERROR", message, http_status_code)
+
+
 class InternalServerError(CustomException):
-    def __init__(self):
-        super().__init__("SERVER_ERROR", "서버측 오류입니다.", status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def __init__(self, message: str, http_status_code: int):
+        super().__init__("SERVER_ERROR", message, http_status_code)

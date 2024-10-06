@@ -30,7 +30,7 @@ services:
       - static_volume:/app/staticfiles  # static 파일 볼륨
       - media_volume:/app/staticfiles  # media 파일 볼륨 (필요시)
     ports:
-      - "18000:8000"
+      - "8000:8000"
     env_file:
       - ./resources/envs/.env  # 환경 변수 파일 설정
     depends_on:
