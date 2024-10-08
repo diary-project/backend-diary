@@ -11,16 +11,14 @@ class RequestDiaryCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Diary
-        fields = ["user", "content", "weather"]
+        fields = ["content", "weather"]
 
     def validate(self, attrs):
-        print(attrs)
-
         if "content" not in attrs or "weather" not in attrs:
             raise serializers.ValidationError("content, weather 필드는 필수입니다.")
 
-        if Diary.objects.filter(user=attrs["user"], date=DateUtil.get_today()).exists():
-            raise serializers.ValidationError("오늘 일기는 이미 작성되었습니다.")
+        # if Diary.objects.filter(user=attrs["user"], date=DateUtil.get_today()).exists():
+        #     raise serializers.ValidationError("오늘 일기는 이미 작성되었습니다.")
 
         return attrs
 
@@ -33,14 +31,11 @@ class RequestDevDiaryCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Diary
-        fields = ["user", "date", "content", "weather"]
+        fields = ["date", "content", "weather"]
 
     def validate(self, attrs):
         if "content" not in attrs or "weather" not in attrs:
             raise serializers.ValidationError("content, weather 필드는 필수입니다.")
-
-        if Diary.objects.filter(user=attrs["user"], date=attrs["date"]).exists():
-            raise serializers.ValidationError("오늘 일기는 이미 작성되었습니다.")
 
         return attrs
 
@@ -53,7 +48,7 @@ class RequestDiaryUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Diary
-        fields = ["user", "date", "content", "weather"]
+        fields = ["content", "weather"]
 
 
 class RequestDiaryDeleteSerializer(serializers.ModelSerializer):

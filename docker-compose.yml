@@ -1,6 +1,27 @@
 version: '3.8'
 
 services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data  # Redis 데이터 저장
+    restart: always
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile-celery  # Celery 전용 Dockerfile 경로
+    volumes:
+      - static_volume:/app/staticfiles  # 필요한 경우 파일 공유
+      - media_volume:/app/staticfiles  # 필요한 경우 파일 공유
+    depends_on:
+      - redis  # Redis와 연결
+    env_file:
+      - ./resources/envs/.env  # .env 파일에서 환경 변수 가져오기
+    restart: always
+
   diary_app:
     build:
       context: .
@@ -9,9 +30,23 @@ services:
       - static_volume:/app/staticfiles  # static 파일 볼륨
       - media_volume:/app/staticfiles  # media 파일 볼륨 (필요시)
     ports:
-      - "18000:8000"
+      - "8000:8000"
     env_file:
-      - resources/envs/.env  # 환경 변수 파일 설정
+      - ./resources/envs/.env  # 환경 변수 파일 설정
+    depends_on:
+      - redis
+      - celery  # Celery가 동작하는지 확인
+
+  flower:
+    image: mher/flower:latest  # Flower 이미지
+    ports:
+      - "5555:5555"  # Flower 웹 대시보드에 접근할 포트
+    env_file:
+      - ./resources/envs/.env  # .env 파일을 통해 환경 변수 설정
+    depends_on:
+      - redis
+      - celery  # Celery 작업자 실행 후 Flower 사용 가능
+    restart: always
 
   nginx:
     image: nginx:latest
@@ -37,12 +72,12 @@ services:
         max-file: "3"
     restart: always  # 자동 재시작 설정
 
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-
 volumes:
   db_data:
   static_volume:
   media_volume:
+  redis_data:
+
+networks:
+  default:
+    driver: bridge

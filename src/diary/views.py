@@ -20,14 +20,11 @@ from diary.serializers.response_serializers import (
 
 from diary.services import (
     get_diary,
-    get_diary_date_by_year_month,
+    get_diary_date_list_by_year_month,
     create_diary,
-    create_diary_dev,
     update_diary,
     delete_diary,
 )
-from tag.tasks import tag_task
-from image.tasks import image_task
 from utils.log_utils import Logger
 
 
@@ -129,8 +126,8 @@ class DiaryDateListCreateAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        diary_query_set = get_diary_date_by_year_month(user_id=request.user.id, year=year, month=month)
-        data = {"dates": list(diary_query_set.values_list("date", flat=True))}
+        diary_date_list = get_diary_date_list_by_year_month(user_id=request.user.id, year=year, month=month)
+        data = {"dates": diary_date_list}
         Logger.debug(f"DiaryDateListCreateAPIView - get -> diary dates : {data}")
 
         return create_success_response(data=data, status=status.HTTP_200_OK)
@@ -143,9 +140,8 @@ class DiaryDateListCreateAPIView(APIView):
     def post(self, request):
         content = request.data.get("content")
         weather = request.data.get("weather")
-        user_id = request.user.id
 
-        data = {"user": user_id, "content": content, "weather": weather}
+        data = {"content": content, "weather": weather}
 
         serializer = RequestDiaryCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -164,17 +160,16 @@ class DevDiaryCreateView(APIView):
         responses={201: ResponseCreateDiarySerializer()},
     )
     def post(self, request):
-        user_id = request.user.id
         content = request.data.get("content")
         weather = request.data.get("weather")
         date = request.data.get("date")
 
-        data = {"user": user_id, "content": content, "weather": weather, "date": date}
+        data = {"content": content, "weather": weather, "date": date}
 
         serializer = RequestDevDiaryCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        created_diary = create_diary_dev(user_id=user_id, content=content, weather=weather, date=date)
+        created_diary = create_diary(user=request.user, content=content, weather=weather, date=date)
         Logger.debug(f"DiaryDateListCreateAPIView - post -> created diary : {created_diary}")
 
         created_diary_serializer = ResponseCreateDiarySerializer(instance=created_diary)

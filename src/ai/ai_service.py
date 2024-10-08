@@ -12,38 +12,38 @@ from ai.openai_client import get_openai_client
 from ai.fake import get_mock_text_response, get_mock_image_response
 
 
-# class AIService(ABC):
-#     @abstractmethod
-#     def generate_text(self, prompt: str, **kwargs):
-#         """
-#         OpenAI GPT 모델을 사용하여 텍스트 생성
-#         """
-#         NotImplementedError("generate_text 메서드를 구현해주세요.")
-#
-#     @abstractmethod
-#     def __extract_content_from_text_reseponse(self, text_response: Any):
-#         """
-#         OpenAI ChatCompletion으로부터 content를 추출합니다.
-#         """
-#         NotImplementedError("__extract_content_from_text_reseponse 메서드를 구현해주세요.")
-#
-#     @abstractmethod
-#     def generate_image(self, prompt: str, **kwargs):
-#         """
-#         OpenAI 모델을 사용하여 이미지 생성
-#         """
-#         NotImplementedError("generate_image 메서드를 구현해주세요.")
-#
-#     @abstractmethod
-#     def __extract_image_url_from_image_response(self, image_response: Any):
-#         """
-#         OpenAI ImagesResponse로부터 이미지 URL을 추출합니다.
-#         """
-#         NotImplementedError("__extract_image_url_from_image_response 메서드를 구현해주세요.")
+class AIService(ABC):
+    @abstractmethod
+    def generate_text(self, prompt: str, **kwargs):
+        """
+        OpenAI GPT 모델을 사용하여 텍스트 생성
+        """
+        NotImplementedError("generate_text 메서드를 구현해주세요.")
+
+    @abstractmethod
+    def _extract_content_from_text_reseponse(self, text_response: Any):
+        """
+        OpenAI ChatCompletion으로부터 content를 추출합니다.
+        """
+        NotImplementedError("__extract_content_from_text_reseponse 메서드를 구현해주세요.")
+
+    @abstractmethod
+    def generate_image(self, prompt: str, **kwargs):
+        """
+        OpenAI 모델을 사용하여 이미지 생성
+        """
+        NotImplementedError("generate_image 메서드를 구현해주세요.")
+
+    @abstractmethod
+    def _extract_image_url_from_image_response(self, image_response: Any):
+        """
+        OpenAI ImagesResponse로부터 이미지 URL을 추출합니다.
+        """
+        NotImplementedError("__extract_image_url_from_image_response 메서드를 구현해주세요.")
 
 
-# class OpenAIService(AIService):
-class OpenAIService:
+class OpenAIService(AIService):
+    # class OpenAIService:
     def generate_text(
         self,
         prompt: str,
@@ -83,13 +83,13 @@ class OpenAIService:
                 temperature=temperature,  # 텍스트의 다양성 조정
             )
 
-            generated_text = self.__extract_content_from_text_reseponse(generate_text_response)
+            generated_text = self._extract_content_from_text_reseponse(generate_text_response)
             return generated_text
 
         except openai.OpenAIError as e:
             raise e
 
-    def __extract_content_from_text_reseponse(self, text_response: ChatCompletion) -> str:
+    def _extract_content_from_text_reseponse(self, text_response: Any) -> str:
         return text_response.choices[0].message.content
 
     def generate_image(
@@ -128,25 +128,47 @@ class OpenAIService:
             )
 
             # GPT로 생성된 이미지는 1시간후 만료됨
-            image_url = self.__extract_image_url_from_image_response(generate_image_response)
+            image_url = self._extract_image_url_from_image_response(generate_image_response)
             return image_url
 
         except openai.OpenAIError as e:
             raise e
 
-    def __extract_image_url_from_image_response(self, image_response: ImagesResponse) -> str:
+    def _extract_image_url_from_image_response(self, image_response: Any) -> str:
         return image_response.data[0].url
 
 
-# class FakeAIService(AIService):
-#     def generate_text(self, prompt: str, **kwargs):
-#         return self.__extract_content_from_text_reseponse(get_mock_text_response())
-#
-#     def __extract_content_from_text_reseponse(self, text_response: Dict):
-#         return text_response["choices"][0]["message"]["content"]
-#
-#     def generate_image(self, prompt: str, **kwargs):
-#         return self.__extract_image_url_from_image_response(get_mock_image_response())
-#
-#     def __extract_image_url_from_image_response(self, image_response: Dict):
-#         return image_response["data"][0]["url"]
+class FakeAIService(AIService):
+    def generate_text(self, prompt: str, **kwargs):
+        """
+        OpenAI GPT 모델을 사용하여 텍스트 생성
+        """
+        return self._extract_content_from_text_reseponse(get_mock_text_response())
+
+    def _extract_content_from_text_reseponse(self, text_response: Any):
+        """
+        OpenAI ChatCompletion으로부터 content를 추출합니다.
+        """
+        print(type(text_response))
+        return text_response["choices"][0]["message"]["content"]
+
+    def generate_image(self, prompt: str, **kwargs):
+        """
+        OpenAI 모델을 사용하여 이미지 생성
+        """
+        return self._extract_image_url_from_image_response(get_mock_image_response())
+
+    def _extract_image_url_from_image_response(self, image_response: Any):
+        """
+        OpenAI ImagesResponse로부터 이미지 URL을 추출합니다.
+        """
+        return image_response["data"][0]["url"]
+
+
+if __name__ == "__main__":
+    ai_service = FakeAIService()
+    text = ai_service.generate_text("오늘은 날씨가 좋네요.")
+    image = ai_service.generate_image("오늘은 날씨가 좋네요.")
+
+    print(text)
+    print(image)

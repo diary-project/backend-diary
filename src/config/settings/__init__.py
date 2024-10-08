@@ -1,4 +1,5 @@
 from .base import *
+from .database import *
 from .swagger import *
 from .log import *
 from os import getenv

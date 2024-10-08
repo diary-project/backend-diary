@@ -1,32 +1,34 @@
-from rest_framework import generics, status
+from django.db import transaction
+from rest_framework import status, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
 
 from user.models import User
 from user.serializers import UserNicknameSerializer
 from utils.log_utils import Logger
 
 
-class UserNicknameMixinAPIView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
+class UserNicknameAPIView(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+    queryset = User.objects.all()
     serializer_class = UserNicknameSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        user_email = request.user.email
-        user = User.objects.get(email=user_email)
+        user = request.user
         data = {"nickname": user.nickname}
-        Logger.debug(f"UserNicknameMixinAPIView.get - data : {data}")
+        Logger.debug(f"UserNicknameAPIView.get - data : {data}")
 
         return Response(data=data, status=status.HTTP_200_OK)
 
-
-class UserNicknameAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
+    @transaction.atomic
+    def update(self, request, *args, **kwargs):
         user = request.user
-        user_email = user.email
+        serializer = self.get_serializer(user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-        user = User.objects.get(email=user_email)
-        return Response(data={"nickname": user.nickname}, status=status.HTTP_200_OK)
+        data = {"nickname": user.nickname}
+        Logger.debug(f"UserNicknameAPIView.update - data : {data}")
+
+        return Response(data=data, status=status.HTTP_200_OK)

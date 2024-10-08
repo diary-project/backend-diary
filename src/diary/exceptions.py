@@ -4,9 +4,12 @@ from common.exceptions import CustomException
 
 class DiaryNotFoundException(CustomException):
     def __init__(self):
-        super().__init__(
-            "DIARY_ERROR_001", "조회된 일기가 없습니다.", status.HTTP_404_NOT_FOUND
-        )
+        super().__init__("DIARY_ERROR_001", "조회된 일기가 없습니다.", status.HTTP_404_NOT_FOUND)
+
+
+class DiaryAlreadyExistException(CustomException):
+    def __init__(self):
+        super().__init__("DIARY_ERROR_002", "이미 일기가 작성되어있습니다.", status.HTTP_400_BAD_REQUEST)
 
 
 class MultipleDiariesFoundException(CustomException):
